@@ -1,5 +1,6 @@
 use russcip::minimal_model;
 use russcip::prelude::*;
+// TODO: Construct a couple of examples of the flow network in question with tests
 
 /// 0-1 Knapsack problem
 #[derive(Debug)]
