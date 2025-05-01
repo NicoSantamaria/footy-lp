@@ -1,6 +1,9 @@
 use std::collections::HashSet;
 use itertools::Itertools;
 
+/// TODO: Simplify structs-- only include necessary data
+/// TODO: research lifetimes to avoid cloning
+
 #[derive(Hash, Eq, PartialEq, Clone, Debug)]
 struct Team {
     name: String,
