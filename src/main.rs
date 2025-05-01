@@ -1,97 +1,62 @@
-use russcip::minimal_model;
-use russcip::prelude::*;
-// TODO: Construct a couple of examples of the flow network in question with tests
+use std::collections::HashSet;
+use itertools::Itertools;
 
-/// 0-1 Knapsack problem
-#[derive(Debug)]
-struct Knapsack {
-    /// Sizes of the items
-    sizes: Vec<usize>,
-    /// Values of the items
-    values: Vec<usize>,
-    /// Capacity of the knapsack
-    capacity: usize,
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
+struct Team {
+    name: String,
+    points: u32,
 }
 
-/// Solution to the knapsack problem
-#[derive(Debug)]
-struct KnapsackSolution {
-    /// Indices of the items in the solution
-    items: Vec<usize>,
-    /// Total value of the solution
-    value: f64,
+struct RemainingPoints {
+    source_team: Team,
+    target_team: Team,
+    remaining: u32,
 }
 
-impl Knapsack {
-    fn new(sizes: Vec<usize>, values: Vec<usize>, capacity: usize) -> Self {
-        assert_eq!(
-            sizes.len(),
-            values.len(),
-            "Sizes and values must have the same length"
-        );
-        Knapsack {
-            sizes,
-            values,
-            capacity,
-        }
+struct Game {
+    teams: HashSet<Team>,
+    number: u32
+}
+
+impl Game {
+    fn new(team1: &Team, team2: &Team, number: u32) -> Game {
+        let mut teams: HashSet<Team> = HashSet::new();
+        teams.insert(team1.clone());
+        teams.insert(team2.clone());
+        Game { teams, number }
     }
+}
 
-    /// Solves the 0-1 knapsack as an integer program
-    fn solve(&self) -> KnapsackSolution {
-        let mut model = minimal_model().maximize();
+pub fn build_constraints(
+    // team: &Team,
+    opponents: Vec<Team>,
+    // games: Vec<Game>
+) {
 
-        let mut vars = Vec::with_capacity(self.sizes.len());
-        for i in 0..self.sizes.len() {
-            vars.push(model.add(var().bin().obj(self.values[i] as f64)));
-        }
+    let possible_games: Vec<Game> = opponents
+        .iter().combinations(2)
+        .map(|combo: Vec<&Team>| Game::new(combo[0], combo[1], 0))
+        .collect();
 
-        let mut capacity_cons = cons().le(self.capacity as f64);
-        for (i, var) in vars.iter().enumerate() {
-            capacity_cons = capacity_cons.coef(var, self.sizes[i] as f64);
-        }
-        model.add(capacity_cons);
-
-        let solved_model = model.solve();
-
-        let sol = solved_model.best_sol().unwrap();
-        let mut items = vec![];
-        for (i, var) in vars.iter().enumerate() {
-            if sol.val(var) > 0.5 {
-                items.push(i);
-            }
-        }
-        let value = sol.obj_val();
-        KnapsackSolution { items, value }
+    for game in possible_games {
+        println!("{:?}", game.teams);
     }
 }
 
 fn main() {
-    let knapsack = Knapsack::new(vec![2, 3, 4, 5], vec![3, 4, 5, 6], 6);
-    let solution = knapsack.solve();
+    let teams: Vec<Team> = Vec::from([
+        Team { name: "Argentina".into(), points: 0 },
+        Team { name: "Mexico".into(), points: 1 },
+        Team { name: "Poland".into(), points: 4 },
+        Team { name: "Saudi Arabia".into(), points: 3 }
+    ]);
 
-    println!("Input: {:?}", knapsack);
-    println!("Solution items: {:?}", solution.items);
-    println!(
-        "Value: {} = {:?}",
-        solution.value,
-        solution
-            .items
-            .iter()
-            .map(|&i| (knapsack.sizes[i], knapsack.values[i]))
-            .collect::<Vec<_>>()
-    );
-}
+    let games: Vec<Game> = Vec::from([
+        Game::new(&teams[0], &teams[1], 0),
+        Game::new(&teams[0], &teams[2], 0),
+        Game::new(&teams[1], &teams[3], 0),
+    ]);
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_knapsack() {
-        let knapsack = Knapsack::new(vec![2, 3, 4, 5], vec![3, 4, 5, 6], 6);
-        let solution = knapsack.solve();
-
-        assert_eq!(solution.items, vec![0, 2]);
-        assert_eq!(solution.value.round(), 8.0);
-    }
+    build_constraints(teams);
+    // build_constraints(&teams[0], teams, games);
 }
