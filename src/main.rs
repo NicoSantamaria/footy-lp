@@ -76,9 +76,7 @@ fn build_constraints<'a>(
             let remaining = remaining_games
                 .iter()
                 .filter(|game| game.teams == possible_game.teams)
-                .count() as u32
-                * 3;
-
+                .count() as u32 * 3;
             RemainingPointsSource::new(team, possible_game, remaining)
         })
         .collect();
