@@ -43,6 +43,21 @@ impl<'a> Game<'a> {
     }
 }
 
+struct Node {
+    teams: HashSet<Team>,
+    capacity: u32
+}
+
+struct Edge {
+    source_team: Team,
+    target_team: Team,
+    capacity: u32
+}
+
+struct Graph {
+    nodes: Vec<Node>,
+    edges: Vec<Edge>,
+}
 
 fn build_constraints<'a>(
     team: &'a Team,
@@ -67,13 +82,6 @@ fn build_constraints<'a>(
             RemainingPointsSource::new(team, possible_game, remaining)
         })
         .collect();
-
-    // for rps in remaining_points_sources {
-    //     println!("{:?}", rps.source_team.name);
-    //     println!("{:?}", rps.target_game.teams);
-    //     println!("{:?}", rps.target_game.number);
-    //     println!("{:?}", rps.remaining);
-    // }
 }
 
 fn main() {
