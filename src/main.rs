@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::hash::Hash;
 use itertools::Itertools;
 
 /// TODO: Simplify structs-- only include necessary data
@@ -10,75 +11,69 @@ struct Team {
     points: u32,
 }
 
-struct RemainingPointsSource {
-    source_team: Team,
-    target_game: Game,
+struct RemainingPointsSource<'a> {
+    source_team: &'a Team,
+    target_game: &'a Game<'a>,
     remaining: u32,
 }
 
-impl RemainingPointsSource {
+impl<'a> RemainingPointsSource<'a> {
     fn new(
-        source_team: &Team,
-        target_game: &Game,
+        source_team: &'a Team,
+        target_game: &'a Game,
         remaining: u32
-    ) -> RemainingPointsSource {
-        RemainingPointsSource {
-            source_team: source_team.clone(),
-            target_game: target_game.clone(),
-            remaining
-        }
+    ) -> Self {
+        Self { source_team, target_game, remaining }
     }
 }
 
-// struct RemainingPointsSink {
-//     source_team: Team,
-//     remaining: u32,
-// }
-
-#[derive(Clone, Debug)]
-struct Game {
-    teams: HashSet<Team>,
-    number: u32
+#[derive(Debug)]
+struct Game<'a> {
+    teams: HashSet<&'a Team>,
+    number: u32,
 }
 
-impl Game {
-    fn new(team1: &Team, team2: &Team, number: u32) -> Game {
-        let mut teams: HashSet<Team> = HashSet::new();
-        teams.insert(team1.clone());
-        teams.insert(team2.clone());
-        Game { teams, number }
+impl<'a> Game<'a> {
+    fn new(
+        team1: &'a Team,
+        team2: &'a Team, number: u32
+    ) -> Self {
+        let teams: HashSet<&'a Team> = HashSet::from([team1, team2]);
+        Self { teams, number }
     }
 }
 
-fn build_constraints(
-    team: Team,
-    opponents: Vec<Team>,
-    remaining_games: Vec<Game>
+
+fn build_constraints<'a>(
+    team: &'a Team,
+    opponents: Vec<&'a Team>,
+    remaining_games: Vec<Game<'a>>,
 ) {
-
-    let possible_games: Vec<Game> = opponents
-        .iter().combinations(2)
-        .map(|combo: Vec<&Team>| Game::new(combo[0], combo[1], 0))
+    let possible_games: Vec<Game<'a>> = opponents
+        .iter()
+        .combinations(2)
+        .map(|combo| Game::new(combo[0], combo[1], 0))
         .collect();
 
-    let remaining_points_source: Vec<RemainingPointsSource> = possible_games
-        .into_iter()
-        .map(|possible_game: Game| {
-            RemainingPointsSource::new(
-                &team,
-                &possible_game,
-                remaining_games.iter()
-                    .filter(|game| game.teams == possible_game.teams)
-                    .count() as u32 * 3
-            )
+    let remaining_points_sources: Vec<RemainingPointsSource> = possible_games
+        .iter()
+        .map(|possible_game| {
+            let remaining = remaining_games
+                .iter()
+                .filter(|game| game.teams == possible_game.teams)
+                .count() as u32
+                * 3;
+
+            RemainingPointsSource::new(team, possible_game, remaining)
         })
         .collect();
 
-    for remaining_points_source in remaining_points_source {
-        println!("{:?}", remaining_points_source.source_team);
-        println!("{:?}", remaining_points_source.target_game);
-        println!("{:?}", remaining_points_source.remaining);
-    }
+    // for rps in remaining_points_sources {
+    //     println!("{:?}", rps.source_team.name);
+    //     println!("{:?}", rps.target_game.teams);
+    //     println!("{:?}", rps.target_game.number);
+    //     println!("{:?}", rps.remaining);
+    // }
 }
 
 fn main() {
@@ -88,6 +83,7 @@ fn main() {
         Team { name: "Poland".into(), points: 4 },
         Team { name: "Saudi Arabia".into(), points: 3 }
     ]);
+    let team_refs: Vec<&Team> = teams.iter().collect();
 
     let games: Vec<Game> = Vec::from([
         Game::new(&teams[0], &teams[1], 0),
@@ -96,5 +92,5 @@ fn main() {
     ]);
 
 
-    build_constraints(teams[0].clone(), teams, games);
+    build_constraints(&teams[0], team_refs, games);
 }
