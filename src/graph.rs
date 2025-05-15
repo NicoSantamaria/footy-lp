@@ -3,11 +3,17 @@ use std::cell::RefCell;
 use std::collections::HashSet;
 use crate::constraints::{ Team, Game };
 
-// also a new/from function for Edge -- for ease of use
+#[derive(Clone)]
+enum EdgeKind {
+    FromSource,
+    InfiniteCapacity,
+    ToSink,
+}
 #[derive(Clone)]
 struct Edge {
     target: Rc<RefCell<Node>>,
-    capacity: Option<u32>
+    capacity: Option<u32>,
+    kind: EdgeKind
 }
 
 struct Node {
@@ -25,14 +31,20 @@ impl Node {
         }))
     }
 
-    // implement a FROM function to build direct from teams
+    fn from(
+        data: impl IntoIterator<Item = Team>
+    ) -> Rc<RefCell<Node>> {
+        let datum: HashSet<Team> = data.into_iter().collect();
+        Node::new(datum)
+    }
 
     fn add_edge(
         node: &Rc<RefCell<Node>>,
         target: Rc<RefCell<Node>>,
-        capacity: Option<u32>
+        capacity: Option<u32>,
+        kind: EdgeKind
     ) {
-        node.borrow_mut().edges.push(Edge { target, capacity });
+        node.borrow_mut().edges.push(Edge { target, capacity, kind });
     }
 
     fn traverse<F>(&self, f: &F, seen: &mut HashSet<*const Node>)
@@ -77,38 +89,24 @@ mod tests {
             Game::new(&teams[1], &teams[3], 0),
         ]);
 
-        let root = {
-            let mut datum = HashSet::new();
-            datum.insert(teams[0].clone());
-            Node::new(datum.clone())
-        };
-
-        let node1 = {
-            let mut datum = HashSet::new();
-            datum.insert(teams[1].clone());
-            Node::new(datum.clone())
-        };
-
-        let node2 = {
-            let mut datum = HashSet::new();
-            datum.insert(teams[2].clone());
-            Node::new(datum.clone())
-        };
+        let root = Node::from([teams[0].clone()]);
+        let node1 = Node::from([teams[1].clone()]);
+        let node2 = Node::from([teams[2].clone()]);
 
         {
             let mut mut_root = root.borrow_mut();
             mut_root.edges.push({
-                let node1_clone = node1.clone();
                 Edge {
-                    target: node1_clone.clone(),
-                    capacity: None
+                    target: node1.clone(),
+                    capacity: None,
+                    kind: EdgeKind::FromSource
                 }
             });
             mut_root.edges.push({
-                let node2_clone = node2.clone();
                 Edge {
-                    target: node2_clone.clone(),
-                    capacity: None
+                    target: node2.clone(),
+                    capacity: None,
+                    kind: EdgeKind::FromSource
                 }
             });
         }
