@@ -40,8 +40,7 @@ impl<'a> RemainingPointsSource<'a> {
 }
 
 struct Node {
-    teams: HashSet<Team>,
-    capacity: u32
+    teams: HashSet<Team>
 }
 
 // should probably indicate whether the edge has integer constraints
