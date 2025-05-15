@@ -4,25 +4,25 @@ use std::collections::HashSet;
 use crate::constraints::{ Team, Game };
 
 #[derive(Clone)]
-enum EdgeKind {
+pub enum EdgeKind {
     FromSource,
     InfiniteCapacity,
     ToSink,
 }
 #[derive(Clone)]
-struct Edge {
-    target: Rc<RefCell<Node>>,
-    capacity: Option<u32>,
-    kind: EdgeKind
+pub struct Edge {
+    pub target: Rc<RefCell<Node>>,
+    pub capacity: Option<u32>,
+    pub kind: EdgeKind
 }
 
-struct Node {
-    datum: HashSet<Team>,
-    edges: Vec<Edge>,
+pub struct Node {
+    pub datum: HashSet<Team>,
+    pub edges: Vec<Edge>,
 }
 
 impl Node {
-    fn new(
+    pub fn new(
         datum: HashSet<Team>
     ) -> Rc<RefCell<Node>> {
         Rc::new(RefCell::new(Node {
@@ -31,7 +31,7 @@ impl Node {
         }))
     }
 
-    fn from(
+    pub fn from(
         data: impl IntoIterator<Item = Team>
     ) -> Rc<RefCell<Node>> {
         let datum: HashSet<Team> = data.into_iter().collect();
@@ -80,13 +80,6 @@ mod tests {
             Team { name: "Mexico".into(), points: 1 },
             Team { name: "Poland".into(), points: 4 },
             Team { name: "Saudi Arabia".into(), points: 3 }
-        ]);
-        let team_refs: Vec<&Team> = teams.iter().collect();
-
-        let games: Vec<Game> = Vec::from([
-            Game::new(&teams[0], &teams[1], 0),
-            Game::new(&teams[0], &teams[2], 0),
-            Game::new(&teams[1], &teams[3], 0),
         ]);
 
         let root = Node::from([teams[0].clone()]);

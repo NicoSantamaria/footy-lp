@@ -15,14 +15,16 @@ fn main() {
         Team { name: "Poland".into(), points: 4 },
         Team { name: "Saudi Arabia".into(), points: 3 }
     ]);
-    let team_refs: Vec<&Team> = teams.iter().collect();
+    // clean up with references and lifetimes
+    let teams_clone = teams.clone();
 
     let games: Vec<Game> = Vec::from([
-        Game::new(&teams[0], &teams[1], 0),
-        Game::new(&teams[0], &teams[2], 0),
-        Game::new(&teams[1], &teams[3], 0),
+        Game::new(teams_clone[0].clone(), teams_clone[1].clone(), 0),
+        Game::new(teams_clone[0].clone(), teams_clone[2].clone(), 0),
+        Game::new(teams_clone[1].clone(), teams_clone[3].clone(), 0),
     ]);
 
+    let source = teams[0].clone();
 
-    build_constraints(&teams[0], team_refs, games);
+    build_constraints(source, teams, games);
 }
