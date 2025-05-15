@@ -23,36 +23,20 @@ impl<'a> Game<'a> {
     }
 }
 
-struct RemainingPointsSource<'a> {
-    source_team: &'a Team,
-    target_game: &'a Game<'a>,
-    remaining: u32,
-}
-
-impl<'a> RemainingPointsSource<'a> {
-    fn new(
-        source_team: &'a Team,
-        target_game: &'a Game,
-        remaining: u32
-    ) -> Self {
-        Self { source_team, target_game, remaining }
-    }
-}
-
-struct Node {
-    teams: HashSet<Team>
-}
-
-// should probably indicate whether the edge has integer constraints
-struct Edge<'a> {
-    source_team: HashSet<&'a Team>,
-    target_team: HashSet<&'a Team>,
-    capacity: Option<u32>,
-}
-
-// struct Graph {
-//     nodes: Vec<Node>,
-//     edges: Vec<Edge>,
+// struct RemainingPointsSource<'a> {
+//     source_team: &'a Team,
+//     target_game: &'a Game<'a>,
+//     remaining: u32,
+// }
+//
+// impl<'a> RemainingPointsSource<'a> {
+//     fn new(
+//         source_team: &'a Team,
+//         target_game: &'a Game,
+//         remaining: u32
+//     ) -> Self {
+//         Self { source_team, target_game, remaining }
+//     }
 // }
 
 // Needs to return Vec<Node>
