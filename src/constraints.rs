@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::cmp;
 use itertools::Itertools;
 use crate::graph::{
     EdgeKind, Edge, Node
@@ -9,20 +10,20 @@ use crate::graph::{
 #[derive(Hash, Eq, PartialEq, Clone, Debug)]
 pub struct Team {
     pub name: String,
-    pub points: u32,
+    pub points: i32,
 }
 
 #[derive(Debug, Clone)]
 pub struct Game {
     pub teams: HashSet<Team>,
-    pub number: u32,
+    pub number: i32,
 }
 
 impl<'a> Game {
     pub fn new(
         team1: Team,
         team2: Team,
-        number: u32
+        number: i32
     ) -> Self {
         let teams: HashSet<Team> = HashSet::from([team1, team2]);
         Self { teams, number }
@@ -55,10 +56,10 @@ fn build_possible_teams_nodes(
 // needs to return Graph type
 pub fn build_constraints(
     source: Team,
-    score: u32,
+    score: i32,
     teams: Vec<Team>,
     remaining_games: Vec<Game>,
-) {
+) -> Rc<RefCell<Node>> {
     let root = Node::from([source]);
     let possible_games_nodes = build_possible_games_nodes(teams.clone());
     let possible_teams_nodes = build_possible_teams_nodes(teams.clone());
@@ -75,7 +76,7 @@ pub fn build_constraints(
                         capacity: Some(remaining_games
                             .iter()
                             .filter(|game| game.teams == possible_game.borrow().datum)
-                            .count() as u32 * 32),
+                            .count() as i32 * 32),
                         kind: EdgeKind::FromSource
                     }
                 })
@@ -106,15 +107,18 @@ pub fn build_constraints(
         // from teams to sink
         for possible_team in possible_teams_nodes.iter() {
             let mut mut_possible_team = possible_team.borrow_mut();
+            let team_datum = mut_possible_team.datum.clone();
 
             mut_possible_team.edges.push({
                 Edge {
                     target: sink.clone(),
-                    capacity: mut_possible_team.datum.iter().next()
-                        .map(|team| score - team.points),
+                    capacity: team_datum.iter().next()
+                        .map(|team| cmp::max(score - team.points, 0)),
                     kind: EdgeKind::ToSink
                 }
             });
-        }
-    }
+        };
+    };
+
+    root
 }

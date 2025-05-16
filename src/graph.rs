@@ -12,7 +12,7 @@ pub enum EdgeKind {
 #[derive(Clone)]
 pub struct Edge {
     pub target: Rc<RefCell<Node>>,
-    pub capacity: Option<u32>,
+    pub capacity: Option<i32>,
     pub kind: EdgeKind
 }
 
@@ -41,13 +41,13 @@ impl Node {
     fn add_edge(
         node: &Rc<RefCell<Node>>,
         target: Rc<RefCell<Node>>,
-        capacity: Option<u32>,
+        capacity: Option<i32>,
         kind: EdgeKind
     ) {
         node.borrow_mut().edges.push(Edge { target, capacity, kind });
     }
 
-    fn traverse<F>(&self, f: &F, seen: &mut HashSet<*const Node>)
+    pub fn traverse<F>(&self, f: &F, seen: &mut HashSet<*const Node>)
     where
         F: Fn(&HashSet<Team>),
     {
@@ -65,48 +65,6 @@ impl Node {
     }
 }
 
-fn foo(node: &Node) {
+pub fn foo(node: &Node) {
     println!("foo: {:#?}", node.datum);
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_graph() {
-        let teams: Vec<Team> = Vec::from([
-            Team { name: "Argentina".into(), points: 0 },
-            Team { name: "Mexico".into(), points: 1 },
-            Team { name: "Poland".into(), points: 4 },
-            Team { name: "Saudi Arabia".into(), points: 3 }
-        ]);
-
-        let root = Node::from([teams[0].clone()]);
-        let node1 = Node::from([teams[1].clone()]);
-        let node2 = Node::from([teams[2].clone()]);
-
-        {
-            let mut mut_root = root.borrow_mut();
-            mut_root.edges.push({
-                Edge {
-                    target: node1.clone(),
-                    capacity: None,
-                    kind: EdgeKind::FromSource
-                }
-            });
-            mut_root.edges.push({
-                Edge {
-                    target: node2.clone(),
-                    capacity: None,
-                    kind: EdgeKind::FromSource
-                }
-            });
-        }
-
-        let mut seen = HashSet::new();
-        root.borrow().traverse(&|teams| {
-            println!("Visiting node with teams: {:?}", teams);
-        }, &mut seen);
-    }
 }
