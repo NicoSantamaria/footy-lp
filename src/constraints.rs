@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use std::cmp;
 use itertools::Itertools;
 use crate::graph::{
-    EdgeKind, Edge, Node
+    EdgeKind, Edge, Node, foo
 };
 
 #[derive(Hash, Eq, PartialEq, Clone, Debug)]
@@ -137,7 +137,7 @@ mod tests {
             Team { name: "Poland".into(), points: 4 },
             Team { name: "Saudi Arabia".into(), points: 3 }
         ]);
-        // clean up with references and lifetimes
+
         let teams_clone = teams.clone();
 
         let games: Vec<Game> = Vec::from([
@@ -150,9 +150,7 @@ mod tests {
 
         let root = build_constraints(source, score, teams, games);
 
-        let mut seen = HashSet::new();
-        root.borrow().traverse(&|teams| {
-            println!("Visiting node with teams: {:?}", teams);
-        }, &mut seen);
+        // ✅ Use the updated graph printer
+        foo(&root);
     }
 }
