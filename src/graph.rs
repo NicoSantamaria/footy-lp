@@ -1,7 +1,9 @@
-use std::rc::Rc;
-use std::cell::RefCell;
-use std::collections::{HashSet, VecDeque};
-use crate::constraints::{Team, Game};
+use std::{
+    cell::RefCell,
+    collections::{ HashSet, VecDeque },
+    rc::Rc,
+};
+use crate::constraints::{ Team };
 
 #[derive(Clone, Debug)]
 pub enum EdgeKind {

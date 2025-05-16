@@ -1,7 +1,9 @@
-use std::collections::HashSet;
-use std::rc::Rc;
-use std::cell::RefCell;
-use std::cmp;
+use std::{
+    cell::RefCell,
+    cmp,
+    collections::HashSet,
+    rc::Rc,
+};
 use itertools::Itertools;
 use crate::graph::{
     EdgeKind, Edge, Node, foo

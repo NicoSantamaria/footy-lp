@@ -1,5 +1,4 @@
 use std::hash::Hash;
-use std::collections::HashSet;
 use footy_lp::constraints::{
     Game, Team, build_constraints
 };
