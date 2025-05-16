@@ -76,7 +76,7 @@ pub fn build_constraints(
                         capacity: Some(remaining_games
                             .iter()
                             .filter(|game| game.teams == possible_game.borrow().datum)
-                            .count() as i32 * 32),
+                            .count() as i32 * 3),
                         kind: EdgeKind::FromSource
                     }
                 })
