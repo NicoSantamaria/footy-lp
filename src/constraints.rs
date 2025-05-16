@@ -55,14 +55,17 @@ fn build_possible_teams_nodes(
 // needs to return Graph type
 pub fn build_constraints(
     source: Team,
+    score: u32,
     teams: Vec<Team>,
     remaining_games: Vec<Game>,
 ) {
     let root = Node::from([source]);
     let possible_games_nodes = build_possible_games_nodes(teams.clone());
     let possible_teams_nodes = build_possible_teams_nodes(teams.clone());
+    let sink = Node::new(HashSet::new());
 
     {
+        // from root to pairings
         let mut mut_root = root.borrow_mut();
         mut_root.edges.extend({
             possible_games_nodes.iter()
@@ -79,9 +82,10 @@ pub fn build_constraints(
                 .collect::<Vec<Edge>>()
         });
 
+        // from pairings to teams
         for possible_game in possible_games_nodes.iter() {
             let mut mut_possible_game = possible_game.borrow_mut();
-            let game_datum = mut_possible_game.datum.clone(); // take a copy for read-only use
+            let game_datum = mut_possible_game.datum.clone();
 
             mut_possible_game.edges.extend({
                 possible_teams_nodes.iter()
@@ -99,6 +103,18 @@ pub fn build_constraints(
             });
         }
 
+        // from teams to sink
+        for possible_team in possible_teams_nodes.iter() {
+            let mut mut_possible_team = possible_team.borrow_mut();
 
+            mut_possible_team.edges.push({
+                Edge {
+                    target: sink.clone(),
+                    capacity: mut_possible_team.datum.iter().next()
+                        .map(|team| score - team.points),
+                    kind: EdgeKind::ToSink
+                }
+            });
+        }
     }
 }

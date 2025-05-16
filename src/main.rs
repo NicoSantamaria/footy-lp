@@ -9,6 +9,7 @@ use footy_lp::constraints::{
 
 
 fn main() {
+    let score = 3;
     let teams: Vec<Team> = Vec::from([
         Team { name: "Argentina".into(), points: 0 },
         Team { name: "Mexico".into(), points: 1 },
@@ -26,5 +27,5 @@ fn main() {
 
     let source = teams[0].clone();
 
-    build_constraints(source, teams, games);
+    build_constraints(source, score, teams, games);
 }
